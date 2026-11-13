@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dire Pro Max - Active Auctions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #ffffff; color: #333; font-family: sans-serif; }
+        .top-header { background-color: #0f763e; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+        .auction-grid { row-gap: 18px; }
+        .card-custom {
+            background: #ffffff;
+            color: #263238;
+            border: 1px solid #e5eee9;
+            border-radius: 13px;
+            padding: 12px;
+            margin-bottom: 0;
+            height: 100%;
+            box-shadow: 0 3px 12px rgba(15, 118, 62, 0.09);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .card-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 18px rgba(15, 118, 62, 0.16);
+        }
+        .item-img {
+            width: 100%;
+            height: 175px;
+            object-fit: contain;
+            background: #f7faf8;
+            border-radius: 9px;
+            margin-bottom: 10px;
+        }
+        .card-custom h4 { font-size: 16px; margin-bottom: 7px; }
+        .card-custom p { font-size: 12px; margin-bottom: 7px; }
+        .card-custom .fs-5 { font-size: 13px !important; }
+        .card-custom .btn { font-size: 13px; padding: 8px 5px; border: 0; background: #1769D2; }
+        .card-custom .btn:hover { background: #1255ad; }
+
+        @media (max-width: 575.98px) {
+            .top-header { font-size: 18px; padding: 12px 5px; }
+            .container { padding-left: 10px; padding-right: 10px; }
+            .item-img { height: 125px; }
+            .card-custom { padding: 9px; border-radius: 10px; }
+            .card-custom h4 { font-size: 14px; }
+            .card-custom p { font-size: 11px; }
+            .card-custom .btn { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-header shadow-sm">
+        DIRE PRO MAX - ACTIVE AUCTIONS
+    </div>
+
+    <div class="container my-4">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary mb-4">&larr; Back to Home</a>
+        
+        <div class="row">
+            <h3 class="mb-4 text-dark fw-bold">Live Auctions</h3>
+            {% for item in auctions %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card card-custom">
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="item-img" alt="{{ item.title }}">
+                    
+                    <h4 class="fw-bold">{{ item.title }}</h4>
+                    <p class="text-muted">Auction Code: <strong>{{ item.code }}</strong></p>
+                    <p class="text-success fw-bold">Bid Service Fee: {{ item.fee }} Br</p>
+                    
+                    <p class="text-danger fw-bold fs-5">
+                        ⏱️ Time Remaining: <span id="timer-{{ loop.index }}" data-time="{{ item.remaining_seconds }}">Calculating...</span>
+                    </p>
+                    
+                    <p class="text-primary fw-bold">{{ item.bids_count }} Bids</p>
+                    <a href="{{ url_for('auction_detail', item_id=item.id) }}" class="btn btn-warning w-100 fw-bold text-white">Bid Now</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Meeshaalee hundaaf timer jalqabsiisuu
+            document.querySelectorAll("[id^='timer-']").forEach(function(timerEl) {
+                let secondsLeft = parseInt(timerEl.getAttribute("data-time")) || 864000;
+                
+                function updateTimer() {
+                    if (secondsLeft <= 0) {
+                        timerEl.innerHTML = "EXPIRED";
+                        return;
+                    }
+                    let days = Math.floor(secondsLeft / (3600 * 24));
+                    let hours = Math.floor((secondsLeft % (3600 * 24)) / 3600);
+                    let minutes = Math.floor((secondsLeft % 3600) / 60);
+                    let seconds = Math.floor(secondsLeft % 60);
+
+                    timerEl.innerHTML = `${days}d : ${hours.toString().padStart(2, '0')}h : ${minutes.toString().padStart(2, '0')}m : ${seconds.toString().padStart(2, '0')}s`;
+                    secondsLeft--;
+                }
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

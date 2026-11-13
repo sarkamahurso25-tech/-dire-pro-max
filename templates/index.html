@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dire Pro Max - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #ffffff; color: #333; font-family: sans-serif; }
+        .top-header { background-color: #0f763e; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+        .hero-box { background: #79bb3f; color: white; padding: 50px 20px; border-radius: 15px; margin-top: 30px; }
+        .btn-start { background: linear-gradient(to right, #1769D2, #4A90E2); color: white; border: none; padding: 15px 35px; font-weight: bold; font-size: 18px; border-radius: 30px; text-decoration: none; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="top-header shadow-sm">
+        DIRE PRO MAX
+    </div>
+
+    <div class="container my-5 text-center">
+        <div class="hero-box shadow">
+            <h2>Welcome to Dire Pro Max Platform</h2>
+            <h1 class="display-4 fw-bold my-3">Bid Low! Win Big!</h1>
+            <p class="lead mb-4">DIRE PRO MAX is a Lowest Unique Bid Auction where the participant who submits the lowest unique bid wins.</p>
+            <a href="{{ url_for('active_auctions') }}" class="btn btn-start">START BIDDING NOW</a>
+        </div>
+    </div>
+
+</body>
+</html>

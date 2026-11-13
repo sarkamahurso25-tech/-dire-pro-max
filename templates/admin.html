@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dire Pro Max - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #ffffff; font-family: sans-serif; }
+        .admin-header { background-color: #0f763e; color: white; padding: 15px; text-align: center; }
+        .card-box { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stat-card { background: linear-gradient(135deg, #0f763e, #79bb3f); color: white; border-radius: 10px; padding: 15px; }
+
+        .active-auctions-btn {
+            background: #1769D2;
+            color: #ffffff;
+            border: 1px solid #1769D2;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 7px;
+            line-height: 1.3;
+            letter-spacing: .2px;
+            white-space: nowrap;
+            transition: .2s ease;
+        }
+        .active-auctions-btn:hover {
+            background: #1255ad;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header shadow-sm d-flex justify-content-between align-items-center px-4">
+        <h4 class="m-0 fw-bold">DIRE PRO MAX ADMIN</h4>
+        <div>
+            <a href="{{ url_for('home') }}" class="btn btn-outline-light btn-sm">User Site</a>
+            <a href="{{ url_for('active_auctions') }}" class="btn btn-sm fw-bold active-auctions-btn">Active Auctions</a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger btn-sm">Logout</a>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        
+        <div class="row mb-4">
+            <div class="col-md-6 mb-2">
+                <div class="stat-card shadow-sm">
+                    <h5>💰 Total Telebirr Revenue</h5>
+                    <h2 class="fw-bold m-0">{{ total_revenue }} Br</h2>
+                </div>
+            </div>
+            <div class="col-md-6 mb-2">
+                <div class="stat-card shadow-sm" style="background: linear-gradient(135deg, #1769D2, #4A90E2);">
+                    <h5>📊 Total Submitted Bids</h5>
+                    <h2 class="fw-bold m-0">{{ bids|length }} Bids</h2>
+                </div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card-box shadow-sm mb-4">
+            <h4 class="fw-bold text-success mb-3">📱 Telebirr Account Settings</h4>
+            <p class="text-muted">Lakkoofsa Telebirr maamiltoonni kaffaltii itti ergan jijjiiri.</p>
+            <form method="POST" action="{{ url_for('update_telebirr') }}">
+            <div class="row align-items-end">
+                <div class="col-md-5 mb-2">
+                    <label class="form-label fw-bold">Telebirr Account 1</label>
+                    <input type="text" name="telebirr_number_1"
+                           class="form-control"
+                           value="{{ telebirr_numbers[0] }}"
+                           placeholder="+251912997717" required>
+                </div>
+                <div class="col-md-5 mb-2">
+                    <label class="form-label fw-bold">Telebirr Account 2</label>
+                    <input type="text" name="telebirr_number_2"
+                           class="form-control"
+                           value="{{ telebirr_numbers[1] }}"
+                           placeholder="+251914995880" required>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <button type="submit" class="btn btn-success w-100 fw-bold">
+                        Save Numbers
+                    </button>
+                </div>
+            </div>
+        </form>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5 mb-4">
+                <div class="card-box shadow-sm">
+                    <h4 class="fw-bold text-success mb-3">➕ Add New Auction</h4>
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-2">
+                            <label class="form-label">Item Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. iPhone 15 Pro" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Auction Code</label>
+                            <input type="text" name="code" class="form-control" placeholder="e.g. 298" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Bid Service Fee (ETB)</label>
+                            <input type="number" step="0.01" name="fee" class="form-control" placeholder="e.g. 50.00" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Minimum Bid Amount (ETB)</label>
+                            <input type="number" step="0.01" min="0.01"
+                                   name="minimum_bid" class="form-control"
+                                   placeholder="e.g. 10.00" value="1.00" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Timer Text</label>
+                            <input type="text" name="timer" class="form-control" placeholder="e.g. 05d : 12h : 00m : 00s" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Upload Item Photo</label>
+                            <input type="file" name="image" class="form-control" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Publish Auction</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7 mb-4">
+                <div class="card-box shadow-sm">
+                    <h4 class="fw-bold text-primary mb-3">🏆 Auction Results & Telebirr Revenue</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Bids</th>
+                                    <th>Revenue</th>
+                                    <th>Lowest Unique (Winner)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in results %}
+                                <tr>
+                                    <td><strong>{{ r.item.title }}</strong><br><small class="text-muted">#{{ r.item.code }}</small></td>
+                                    <td><span class="badge bg-info text-dark">{{ r.item.bids_count }} Bids</span></td>
+                                    <td class="fw-bold text-success">{{ r.revenue }} Br</td>
+                                    <td>
+                                        {% if r.winner %}
+                                            <span class="badge bg-success">📱 {{ r.winner.phone }} ({{ r.winner.amount }} Br)<br><small>TxID: {{ r.winner.tx_id }}</small></span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No Winner Yet</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_auction', item_id=r.item.id) }}" onsubmit="return confirm('Are you sure you want to cancel this auction?')">
+    <button type="submit" class="btn btn-danger btn-sm">Cancel Auction</button>
+</form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No auctions available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Telebirr Payment Verification -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card-box shadow-sm">
+                    <h4 class="fw-bold text-success mb-3">💳 Telebirr Payment Verification</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Payment ID</th>
+                                    <th>Auction ID</th>
+                                    <th>Amount</th>
+                                    <th>Transaction ID</th>
+                                    <th>Date</th>
+                                    <th>Status / Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in payments %}
+                                <tr>
+                                    <td>#{{ p.id }}</td>
+                                    <td>#{{ p.auction_id }}</td>
+                                    <td>{{ p.amount }} Br</td>
+                                    <td>{{ p.transaction_ref }}</td>
+                                    <td>{{ p.created_at }}</td>
+                                    <td>
+                                        {% if p.status == 'confirmed' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            <form method="POST" action="{{ url_for('confirm_payment', payment_id=p.id) }}" class="mt-2" onsubmit="return confirm('Confirm this Telebirr payment?')">
+                                                <button type="submit" class="btn btn-success btn-sm">Confirm Payment</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">No payments submitted yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bids History with Telebirr Transaction IDs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card-box shadow-sm">
+                    <h4 class="fw-bold text-dark mb-3">📋 All Bids & Telebirr Transactions</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>Item ID</th>
+                                    <th>User Phone</th>
+                                    <th>Bid Amount (ETB)</th>
+                                    <th>Telebirr Transaction ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bids %}
+                                <tr>
+                                    <td>#{{ b.item_id }}</td>
+                                    <td>{{ b.phone }}</td>
+                                    <td class="fw-bold text-success">{{ b.amount }} Br</td>
+                                    <td><span class="badge bg-dark">{{ b.tx_id }}</span></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-muted text-center">No bids submitted yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

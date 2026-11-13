@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>የድሬ ዳዋ ግብርና ቢሮ | Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+:root {
+    --green:#087f55;
+    --dark:#07583e;
+    --blue:#1769aa;
+    --bg:#ffffff;
+    --text:#20352e;
+}
+
+* { box-sizing:border-box; }
+
+body {
+    margin:0;
+    background:var(--bg);
+    font-family:"Noto Sans Ethiopic",Arial,sans-serif;
+    color:var(--text);
+}
+
+.topbar {
+    background:linear-gradient(120deg,#07583e,#0b9870);
+    padding:17px 22px;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    box-shadow:0 4px 15px #0002;
+}
+
+.brand {
+    font-size:19px;
+    font-weight:800;
+}
+
+.brand small {
+    display:block;
+    font-size:11px;
+    opacity:.8;
+    margin-top:5px;
+}
+
+.home-btn {
+    border:1px solid #ffffff80;
+    color:white;
+    text-decoration:none;
+    padding:9px 16px;
+    border-radius:9px;
+    font-size:13px;
+}
+
+.home-btn:hover {
+    background:white;
+    color:var(--green);
+}
+
+.container-main {
+    max-width:1450px;
+    margin:auto;
+    padding:25px 18px 45px;
+}
+
+/* MAIN OFFICE HEAD */
+
+.boss-card {
+    max-width:750px;
+    margin:0 auto 20px;
+    padding:24px;
+    border-radius:18px;
+    text-align:center;
+    color:white;
+    background:linear-gradient(130deg,#07583e,#0d9670);
+    box-shadow:0 8px 25px #07583e35;
+    cursor:pointer;
+    transition:.25s;
+    border:2px solid #ffffff30;
+}
+
+.boss-card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 12px 30px #07583e40;
+}
+
+.boss-icon {
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#ffffff25;
+    display:grid;
+    place-items:center;
+    margin:0 auto 10px;
+    font-size:27px;
+}
+
+.boss-card h2 {
+    font-size:23px;
+    font-weight:800;
+    margin:0;
+}
+
+.boss-card p {
+    font-size:12px;
+    margin:7px 0 0;
+    opacity:.85;
+}
+
+/* SUPPORT OFFICES */
+
+.support-grid {
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:12px;
+    max-width:1150px;
+    margin:0 auto 32px;
+}
+
+.support-card {
+    background:white;
+    border:1px solid #e0eae5;
+    border-radius:12px;
+    padding:17px 8px;
+    text-align:center;
+    color:#245341;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    box-shadow:0 3px 12px #00000008;
+}
+
+.support-card i {
+    display:block;
+    font-size:24px;
+    color:var(--green);
+    margin-bottom:8px;
+}
+
+.support-card:hover {
+    background:#e9f7f0;
+    border-color:#0b9870;
+    transform:translateY(-3px);
+}
+
+/* DEPARTMENT SECTION */
+
+.section-title {
+    text-align:center;
+    margin:12px 0 20px;
+    font-size:17px;
+    font-weight:800;
+    color:#315747;
+}
+
+.dept-grid {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:18px;
+    align-items:stretch;
+}
+
+.dept-column {
+    background:white;
+    border:1px solid #e2eae6;
+    border-radius:17px;
+    padding:15px;
+    box-shadow:0 5px 18px #00000008;
+}
+
+.dept-header {
+    padding:17px 12px;
+    color:white;
+    text-align:center;
+    border-radius:12px;
+    min-height:95px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:8px;
+    font-size:15px;
+    font-weight:800;
+    line-height:1.6;
+}
+
+.dept-header i {
+    font-size:25px;
+}
+
+.agriculture { background:linear-gradient(130deg,#087f55,#16a477); }
+.water { background:linear-gradient(130deg,#075d91,#168fc0); }
+.cooperative { background:linear-gradient(130deg,#1769D2,#4A90E2); }
+
+.sub-box {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:15px 12px;
+    margin-top:13px;
+    background:#f7faf8;
+    border:1px solid #e5eee8;
+    border-radius:11px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.sub-box:hover {
+    background:#eaf6ef;
+    border-color:#0b9870;
+    transform:translateX(3px);
+}
+
+.sub-icon {
+    width:42px;
+    height:42px;
+    flex-shrink:0;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:#dff2e8;
+    color:#087f55;
+    font-size:21px;
+}
+
+.sub-text strong {
+    display:block;
+    font-size:13px;
+    line-height:1.6;
+    color:#244b39;
+}
+
+.sub-text small {
+    display:block;
+    color:#82938a;
+    font-size:10px;
+    margin-top:4px;
+}
+
+.arrow {
+    margin-left:auto;
+    color:#91a69a;
+}
+
+/* MODAL */
+
+.modal-content {
+    border:0;
+    border-radius:16px;
+    overflow:hidden;
+}
+
+.modal-header {
+    background:linear-gradient(120deg,#07583e,#0b9870);
+    color:white;
+}
+
+.modal-title {
+    font-size:17px;
+    font-weight:800;
+}
+
+.modal-body {
+    background:#f8fbf9;
+}
+
+.form-label {
+    font-size:13px;
+    font-weight:700;
+    color:#315747;
+}
+
+.form-control {
+    border-radius:9px;
+    padding:11px;
+}
+
+.save-btn {
+    background:var(--green);
+    color:white;
+    border:0;
+    border-radius:9px;
+    padding:12px;
+    font-weight:700;
+}
+
+.save-btn:hover {
+    background:var(--dark);
+    color:white;
+}
+
+@media(max-width:1000px) {
+    .support-grid {
+        grid-template-columns:repeat(3,1fr);
+    }
+    .dept-grid {
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:650px) {
+    .container-main {
+        padding:18px 12px 35px;
+    }
+    .brand {
+        font-size:15px;
+    }
+    .boss-card {
+        padding:20px 12px;
+    }
+    .boss-card h2 {
+        font-size:19px;
+    }
+    .support-grid {
+        grid-template-columns:repeat(2,1fr);
+        gap:9px;
+    }
+    .dept-grid {
+        grid-template-columns:1fr;
+        gap:14px;
+    }
+    .dept-header {
+        min-height:75px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        🌱 የግብርና ቢሮ አስተዳደር ስርዓት
+        <small>ACTIVE KPI • PLAN • PERFORMANCE MANAGEMENT</small>
+    </div>
+    <a href="{{ url_for('cover') }}" class="home-btn">
+        <i class="bi bi-house-door"></i> መግቢያ
+    </a>
+</header>
+
+<main class="container-main">
+
+    <!-- OFFICE HEAD -->
+    <div class="boss-card"
+         onclick="openModal('ዋና ቢሮ ኃላፊ','የቢሮው ዋና አስተዳዳሪ')">
+        <div class="boss-icon">
+            <i class="bi bi-person-fill-gear"></i>
+        </div>
+        <h2>ዋና ቢሮ ኃላፊ</h2>
+        <p>የቢሮው ዋና አመራር • KPI • ዕቅድ • አፈጻጸም</p>
+    </div>
+
+    <!-- SUPPORT UNITS -->
+    <div class="support-grid">
+
+        <div class="support-card"
+             onclick="openModal('አማካሪ','የቢሮ ዋና አማካሪ')">
+            <i class="bi bi-person-check"></i>
+            አማካሪ
+        </div>
+
+        <div class="support-card"
+             onclick="openModal('ፋይናንስ','የፋይናንስ ክፍል')">
+            <i class="bi bi-cash-stack"></i>
+            ፋይናንስ
+        </div>
+
+        <div class="support-card"
+             onclick="openModal('ፕላን','የፕላንና ፕሮግራም ክፍል')">
+            <i class="bi bi-bar-chart-line"></i>
+            ፕላን
+        </div>
+
+        <div class="support-card"
+             onclick="openModal('ኦዲተር','የውስጥ ኦዲት ክፍል')">
+            <i class="bi bi-clipboard-check"></i>
+            ኦዲተር
+        </div>
+
+        <div class="support-card"
+             onclick="openModal('Programs','የልማት ፕሮግራሞች')">
+            <i class="bi bi-diagram-3"></i>
+            Programs
+        </div>
+
+        <div class="support-card"
+             onclick="openModal('Communication','የህዝብ ግንኙነት ክፍል')">
+            <i class="bi bi-megaphone"></i>
+            Communication
+        </div>
+
+    </div>
+
+    <div class="section-title">
+        የሥራ ዘርፎችና ዳይሬክቶሬቶች
+    </div>
+
+    <!-- THREE MAIN OFFICES -->
+    <div class="dept-grid">
+
+        <!-- AGRICULTURE -->
+        <section class="dept-column">
+
+            <div class="dept-header agriculture">
+                <i class="bi bi-flower1"></i>
+                ምክትል ኃላፊ የግብርና ጽ/ቤት
+            </div>
+
+            <div class="sub-box"
+                 onclick="openModal('የኤክስቴንሽን ዳይሬክቶሬት','የግብርና ቴክኖሎጂና ኤክስቴንሽን')">
+                <div class="sub-icon">
+                    <i class="bi bi-tree"></i>
+                </div>
+                <div class="sub-text">
+                    <strong>የኤክስቴንሽን ዳይሬክቶሬት</strong>
+                    <small>KPI • Plan • Performance</small>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+            </div>
+
+            <div class="sub-box"
+                 onclick="openModal('የተፈጥሮ ሀብትና ማሳ ዳይሬክቶሬት','የተፈጥሮ ሀብት ልማትና ጥበቃ')">
+                <div class="sub-icon">
+                    <i class="bi bi-globe-americas"></i>
+                </div>
+                <div class="sub-text">
+                    <strong>የተፈጥሮ ሀብትና ማሳ ዳይሬክቶሬት</strong>
+                    <small>KPI • Plan • Performance</small>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+            </div>
+
+        </section>
+
+        <!-- WATER AND MINERALS -->
+        <section class="dept-column">
+
+            <div class="dept-header water">
+                <i class="bi bi-droplet-half"></i>
+                የውሃ፣ ማዕድንና ኢነርጂ ጽ/ቤት
+            </div>
+
+            <div class="sub-box"
+                 onclick="openModal('የማዕድን ዳይሬክቶሬት','የማዕድን ልማትና አስተዳደር')">
+                <div class="sub-icon">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <div class="sub-text">
+                    <strong>የማዕድን ዳይሬክቶሬት</strong>
+                    <small>KPI • Plan • Performance</small>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+            </div>
+
+            <div class="sub-box"
+                 onclick="openModal('የውሃ ቁፋሮ ዳይሬክቶሬት','የውሃ ጉድጓድ ቁፋሮ አገልግሎት')">
+                <div class="sub-icon">
+                    <i class="bi bi-water"></i>
+                </div>
+                <div class="sub-text">
+                    <strong>የውሃ ቁፋሮ ዳይሬክቶሬት</strong>
+                    <small>KPI • Plan • Performance</small>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+            </div>
+
+        </section>
+
+        <!-- COOPERATIVES -->
+        <section class="dept-column">
+
+            <div class="dept-header cooperative">
+                <i class="bi bi-people-fill"></i>
+                የህብረት ሥራ ማህበራት ማደራጃ፣ ግብአትና ግብይት ጽ/ቤት
+            </div>
+
+            <div class="sub-box"
+                 onclick="openModal('የግብአትና ግብይት ዳይሬክቶሬት','የግብርና ግብአትና ግብይት አስተዳደር')">
+                <div class="sub-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div class="sub-text">
+                    <strong>የግብአትና ግብይት ዳይሬክቶሬት</strong>
+                    <small>KPI • Plan • Performance</small>
+                </div>
+                <i class="bi bi-chevron-right arrow"></i>
+            </div>
+
+        </section>
+
+    </div>
+</main>
+
+<!-- KPI MODAL -->
+<div class="modal fade" id="kpiModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="modalTitle">መረጃ ማስተዳደሪያ</h5>
+                    <small id="modalSub"></small>
+                </div>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="kpiForm" onsubmit="saveKPI(event)">
+
+                    <div class="mb-3">
+                        <label class="form-label">የKPI ውጤት (%)</label>
+                        <input type="number" class="form-control"
+                               min="0" max="100" step="0.01"
+                               placeholder="ለምሳሌ 90" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">ዕቅድ (Karoora)</label>
+                        <textarea class="form-control" rows="3"
+                                  placeholder="ዕቅድ እዚህ ያስገቡ..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">አፈጻጸም (Raawwii)</label>
+                        <textarea class="form-control" rows="3"
+                                  placeholder="አፈጻጸም እዚህ ያስገቡ..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">የማስረጃ ፎቶ</label>
+                        <input type="file" class="form-control"
+                               accept="image/*,.pdf">
+                    </div>
+
+                    <button type="submit" class="save-btn w-100">
+                        <i class="bi bi-cloud-upload"></i>
+                        መረጃ መዝግብ
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let currentOffice = '';
+
+function openModal(title, subtitle) {
+    currentOffice = title;
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalSub').innerText = subtitle;
+
+    document.getElementById('kpiForm').reset();
+
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('kpiModal')
+    ).show();
+}
+
+function saveKPI(event) {
+    event.preventDefault();
+
+    alert(
+        'መረጃው ዝግጁ ነው። ' +
+        'በሚቀጥለው ደረጃ Database ጋር እናገናኘዋለን።'
+    );
+}
+</script>
+
+</body>
+</html>

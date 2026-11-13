@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dire Pro Max - Place Bid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #ffffff; color: #333; font-family: sans-serif; }
+        .top-header { background-color: #0f763e; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
+        .card-custom { background: #fff; border-radius: 15px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 30px; }
+        .item-img { width: 100%; height: 250px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
+        .telebirr-box { background-color: #EFF6FF; border: 2px dashed #0f763e; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="top-header shadow-sm">
+        DIRE PRO MAX - BIDDING PANEL
+    </div>
+
+    <div class="container my-4">
+        <a href="{{ url_for('active_auctions') }}" class="btn btn-secondary mb-3">&larr; Back to Auctions</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card card-custom">
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="item-img" alt="{{ item.title }}">
+                    
+                    <h3 class="fw-bold">{{ item.title }}</h3>
+                    <p class="text-muted">Auction Code: <strong>{{ item.code }}</strong></p>
+                    <p class="text-success fw-bold fs-5">Service Fee: {{ item.fee }} Br</p>
+                    <hr>
+
+                    <form method="POST">
+                    <!-- Telebirr Payment Instructions with User Account -->
+                    <div class="telebirr-box">
+                        <h5 class="fw-bold text-success">📱 Telebirr Payment Required</h5>
+                        <p class="mb-1">Maaloo kaffaltii tajaajilaa (<strong>{{ item.fee }} Br</strong>) kana Telebirr kootiin kaffaluun <strong>Transaction ID</strong> galchaa.</p>
+                        <div class="mt-2">
+                            <label class="form-label fw-bold">Choose Telebirr Account:</label>
+                            {% for number in telebirr_numbers %}
+                            <div class="form-check mb-2">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="telebirr_account"
+                                    id="telebirr-{{ loop.index }}"
+                                    value="{{ number }}"
+                                    {% if loop.first %}checked{% endif %}
+                                    required
+                                >
+                                <label class="form-check-label fw-bold text-success" for="telebirr-{{ loop.index }}">
+                                    📱 {{ number }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Your Phone Number</label>
+                            <input type="text" name="user_phone" class="form-control" placeholder="e.g. 0911223344" required>
+                        </div>
+                        <div class="alert alert-success fw-bold">
+                            Minimum Bid: {{ item.minimum_bid }} Br
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Your Unique Bid Amount (ETB)</label>
+                            <input type="number" step="0.01"
+                                   min="{{ item.minimum_bid }}"
+                                   name="bid_amount" class="form-control"
+                                   placeholder="Minimum {{ item.minimum_bid }} Br or higher"
+                                   required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Telebirr Transaction ID</label>
+                            <input type="text" name="tx_id" class="form-control" placeholder="e.g. AX98765432" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2">Submit Bid & Telebirr Payment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
