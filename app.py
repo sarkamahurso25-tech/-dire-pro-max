@@ -14,7 +14,8 @@ from flask_login import (
     LoginManager, login_user, logout_user,
     login_required, current_user
 )
-from werkzeug.security import check_password_hash
+import secrets
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from config import Config
@@ -485,6 +486,37 @@ def delete_auction(item_id):
 
     return redirect(url_for("admin_dashboard"))
 
+
+
+@app.route("/internal/admin-password-reset", methods=["POST"])
+def secure_admin_password_reset():
+    reset_token = os.environ.get("ADMIN_RESET_TOKEN", "")
+    supplied_token = request.form.get("token", "")
+
+    if not reset_token or not secrets.compare_digest(
+        supplied_token, reset_token
+    ):
+        return "Unauthorized", 401
+
+    phone = request.form.get("phone", "").strip()
+    password = request.form.get("password", "")
+
+    if not phone or len(password) < 10:
+        return "Phone number and password of at least 10 characters are required.", 400
+
+    user = User.query.filter_by(phone=phone, role="admin").first()
+    if not user:
+        return "Existing admin account not found.", 404
+
+    try:
+        user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        app.logger.warning("Admin password reset completed.")
+        return "ADMIN PASSWORD RESET SUCCESSFUL", 200
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Admin password reset failed.")
+        return "Password reset failed.", 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
