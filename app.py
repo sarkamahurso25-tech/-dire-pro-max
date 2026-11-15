@@ -499,24 +499,36 @@ def secure_admin_password_reset():
         return "Unauthorized", 401
 
     phone = request.form.get("phone", "").strip()
+    full_name = request.form.get("full_name", "").strip()
     password = request.form.get("password", "")
 
-    if not phone or len(password) < 10:
-        return "Phone number and password of at least 10 characters are required.", 400
-
-    user = User.query.filter_by(phone=phone, role="admin").first()
-    if not user:
-        return "Existing admin account not found.", 404
+    if not phone or not full_name or len(password) < 10:
+        return "Phone, full name and password of at least 10 characters are required.", 400
 
     try:
-        user.password_hash = generate_password_hash(password)
+        user = User.query.filter_by(phone=phone).first()
+
+        if user:
+            user.full_name = full_name
+            user.role = "admin"
+            user.password_hash = generate_password_hash(password)
+        else:
+            user = User(
+                full_name=full_name,
+                phone=phone,
+                password_hash=generate_password_hash(password),
+                role="admin"
+            )
+            db.session.add(user)
+
         db.session.commit()
-        app.logger.warning("Admin password reset completed.")
-        return "ADMIN PASSWORD RESET SUCCESSFUL", 200
+        app.logger.warning("Admin account setup completed.")
+        return "ADMIN ACCOUNT READY", 200
+
     except Exception:
         db.session.rollback()
-        app.logger.exception("Admin password reset failed.")
-        return "Password reset failed.", 500
+        app.logger.exception("Admin account setup failed.")
+        return "Admin account setup failed.", 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
