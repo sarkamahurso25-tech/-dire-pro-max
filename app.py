@@ -188,9 +188,9 @@ def get_confirmed_winner(auction_id):
     if not unique_amounts:
         return None
 
-    lowest = min(unique_amounts)
+    highest = max(unique_amounts)
     winner_bid = next(
-        bid for bid in eligible if bid.amount == lowest
+        bid for bid in eligible if bid.amount == highest
     )
     return SimpleNamespace(
         phone=winner_bid.phone,
