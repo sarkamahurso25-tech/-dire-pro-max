@@ -58,6 +58,7 @@ class Bid(db.Model):
     amount = db.Column(db.Numeric(12, 2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     phone = db.Column(db.String(30))
+    bidder_name = db.Column(db.String(150), nullable=True)
     tx_id = db.Column(db.String(150))
 
 

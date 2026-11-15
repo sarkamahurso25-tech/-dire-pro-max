@@ -140,6 +140,7 @@
                                     <th>Bids</th>
                                     <th>Revenue</th>
                                     <th>Highest Unique (Winner)</th>
+                                    <th>Participants</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -157,6 +158,35 @@
                                         {% endif %}
                                     </td>
                                     <td>
+                                        <details>
+                                            <summary class="btn btn-outline-primary btn-sm">
+                                                View {{ r.bidders|length }} bidders
+                                            </summary>
+                                            <div class="mt-2" style="min-width:260px;">
+                                                {% for b in r.bidders %}
+                                                <div class="border rounded p-2 mb-2">
+                                                    <strong>{{ b.name }}</strong><br>
+                                                    <small>Phone: {{ b.phone }}</small><br>
+                                                    <span class="fw-bold">{{ b.amount }} Br</span><br>
+                                                    <small>TxID: {{ b.tx_id }}</small><br>
+                                                    {% if b.payment_status == 'confirmed' %}
+                                                        <span class="badge bg-success">Payment Confirmed</span>
+                                                    {% elif b.payment_status == 'pending' %}
+                                                        <span class="badge bg-warning text-dark">Payment Pending</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Payment Not Found</span>
+                                                    {% endif %}
+                                                    {% if b.is_winner %}
+                                                        <span class="badge bg-success">🏆 WINNER</span>
+                                                    {% endif %}
+                                                </div>
+                                                {% else %}
+                                                <span class="text-muted">No bidders yet.</span>
+                                                {% endfor %}
+                                            </div>
+                                        </details>
+                                    </td>
+                                    <td>
                                         <form method="POST" action="{{ url_for('delete_auction', item_id=r.item.id) }}" onsubmit="return confirm('Are you sure you want to cancel this auction?')">
     <button type="submit" class="btn btn-danger btn-sm">Cancel Auction</button>
 </form>
@@ -164,7 +194,7 @@
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">No auctions available.</td>
+                                    <td colspan="6" class="text-center text-muted">No auctions available.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -232,23 +262,38 @@
                         <table class="table table-striped align-middle">
                             <thead class="table-secondary">
                                 <tr>
-                                    <th>Item ID</th>
-                                    <th>User Phone</th>
+                                    <th>Auction / Item</th>
+                                    <th>Bidder Name</th>
+                                    <th>Phone</th>
                                     <th>Bid Amount (ETB)</th>
-                                    <th>Telebirr Transaction ID</th>
+                                    <th>Transaction ID</th>
+                                    <th>Payment / Winner</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for b in bids %}
                                 <tr>
-                                    <td>#{{ b.item_id }}</td>
+                                    <td>{{ b.item_title }} <small class="text-muted">(#{{ b.item_id }})</small></td>
+                                    <td class="fw-bold">{{ b.bidder_name }}</td>
                                     <td>{{ b.phone }}</td>
                                     <td class="fw-bold text-success">{{ b.amount }} Br</td>
                                     <td><span class="badge bg-dark">{{ b.tx_id }}</span></td>
+                                    <td>
+                                        {% if b.payment_status == 'confirmed' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% elif b.payment_status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Found</span>
+                                        {% endif %}
+                                        {% if b.is_winner %}
+                                            <span class="badge bg-success">🏆 WINNER</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-muted text-center">No bids submitted yet.</td>
+                                    <td colspan="6" class="text-muted text-center">No bids submitted yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

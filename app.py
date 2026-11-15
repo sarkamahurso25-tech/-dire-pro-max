@@ -3,6 +3,7 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
+from sqlalchemy import inspect, text
 from functools import wraps
 from types import SimpleNamespace
 
@@ -36,7 +37,19 @@ db.init_app(app)
 # Create missing database tables without deleting existing data.
 with app.app_context():
     db.create_all()
-    app.logger.info("Database tables initialized successfully.")
+
+    # Safely add bidder_name to existing databases without deleting records.
+    bid_columns = {
+        column["name"]
+        for column in inspect(db.engine).get_columns("bid")
+    }
+    if "bidder_name" not in bid_columns:
+        with db.engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE bid ADD COLUMN bidder_name VARCHAR(150)")
+            )
+
+    app.logger.info("Database tables and bidder-name column initialized.")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -236,11 +249,14 @@ def auction_detail(item_id):
 
     if request.method == "POST":
         try:
+            bidder_name = request.form.get("bidder_name", "").strip()
             user_phone = request.form.get("user_phone", "").strip()
             tx_id = request.form.get("tx_id", "").strip()
             selected_account = request.form.get("telebirr_account", "").strip()
             bid_amount = Decimal(request.form.get("bid_amount", ""))
 
+            if not bidder_name or len(bidder_name) > 150:
+                raise ValueError("Maqaa guutuu kee galchi.")
             if not user_phone or len(user_phone) > 30:
                 raise ValueError("Lakkoofsa bilbilaa sirrii galchi.")
             if not tx_id or len(tx_id) > 150:
@@ -267,6 +283,7 @@ def auction_detail(item_id):
                 user_id=None,
                 amount=bid_amount,
                 phone=user_phone,
+                bidder_name=bidder_name,
                 tx_id=tx_id
             )
 
@@ -414,8 +431,21 @@ def admin_dashboard():
     results = []
     total_revenue = Decimal("0.00")
 
+    # Build payment-status lookup without changing existing records.
+    payment_rows = Payment.query.all()
+    payment_status_by_key = {
+        (payment.auction_id, payment.transaction_ref): payment.status
+        for payment in payment_rows
+        if payment.transaction_ref
+    }
+
+    winner_by_auction = {}
+
     for auction in auction_rows:
         item = get_auction_item(auction)
+        winner = get_confirmed_winner(auction.id)
+        winner_by_auction[auction.id] = winner
+
         revenue = (
             db.session.query(db.func.coalesce(db.func.sum(Payment.amount), 0))
             .filter(
@@ -424,22 +454,66 @@ def admin_dashboard():
             ).scalar()
         )
         total_revenue += Decimal(str(revenue))
+
+        auction_bid_rows = (
+            Bid.query
+            .filter_by(auction_id=auction.id)
+            .order_by(Bid.created_at.desc())
+            .all()
+        )
+
+        bidders = []
+        for bid_row in auction_bid_rows:
+            is_winner = bool(
+                winner
+                and winner.tx_id
+                and bid_row.tx_id == winner.tx_id
+                and bid_row.amount == winner.amount
+            )
+            bidders.append(SimpleNamespace(
+                name=bid_row.bidder_name or bid_row.phone or "Maqaa hin galmoofne",
+                phone=bid_row.phone or "",
+                amount=bid_row.amount,
+                tx_id=bid_row.tx_id or "",
+                payment_status=payment_status_by_key.get(
+                    (auction.id, bid_row.tx_id), "not found"
+                ),
+                is_winner=is_winner
+            ))
+
         results.append(SimpleNamespace(
             item=item,
-            winner=get_confirmed_winner(auction.id),
-            revenue=revenue
+            winner=winner,
+            revenue=revenue,
+            bidders=bidders
         ))
 
     bid_rows = Bid.query.order_by(Bid.created_at.desc()).all()
-    bids = [
-        SimpleNamespace(
-            item_id=row.auction_id,
-            phone=row.phone or "",
-            amount=row.amount,
-            tx_id=row.tx_id or ""
+    auction_titles = {
+        auction.id: auction.title for auction in auction_rows
+    }
+
+    bids = []
+    for bid_row in bid_rows:
+        winner = winner_by_auction.get(bid_row.auction_id)
+        is_winner = bool(
+            winner
+            and winner.tx_id
+            and bid_row.tx_id == winner.tx_id
+            and bid_row.amount == winner.amount
         )
-        for row in bid_rows
-    ]
+        bids.append(SimpleNamespace(
+            item_id=bid_row.auction_id,
+            item_title=auction_titles.get(bid_row.auction_id, "Unknown Auction"),
+            bidder_name=bid_row.bidder_name or bid_row.phone or "Maqaa hin galmoofne",
+            phone=bid_row.phone or "",
+            amount=bid_row.amount,
+            tx_id=bid_row.tx_id or "",
+            payment_status=payment_status_by_key.get(
+                (bid_row.auction_id, bid_row.tx_id), "not found"
+            ),
+            is_winner=is_winner
+        ))
 
     payments = (
         Payment.query
