@@ -47,6 +47,34 @@
             .card-custom p { font-size: 11px; }
             .card-custom .btn { font-size: 12px; }
         }
+    
+        .item-img { cursor: zoom-in; }
+        .image-preview[hidden] { display: none !important; }
+        .image-preview {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,.94);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 16px; gap: 16px;
+        }
+        .image-preview img {
+            display: block; max-width: 96vw; max-height: 78vh;
+            width: auto; height: auto; object-fit: contain;
+            border-radius: 8px;
+        }
+        .image-preview-actions {
+            display: flex; gap: 14px; justify-content: center;
+        }
+        .image-preview-actions a,
+        .image-preview-actions button {
+            min-width: 115px; padding: 11px 22px;
+            border: 0; border-radius: 9px;
+            font-size: 16px; font-weight: bold;
+            text-decoration: none; text-align: center;
+        }
+        .image-preview-save { background: #198754; color: white; }
+        .image-preview-back { background: white; color: #222; }
+
     </style>
 </head>
 <body>
@@ -63,7 +91,7 @@
             {% for item in auctions %}
             <div class="col-6 col-md-4 col-lg-3">
                 <div class="card card-custom">
-                    <img src="{{ item.image if item.image.startswith('https://') else url_for('static', filename='uploads/' + item.image) }}" class="item-img" alt="{{ item.title }}">
+                    <img src="{{ item.image if item.image.startswith('https://') else url_for('static', filename='uploads/' + item.image) }}" class="item-img" title="Tap to view full image" alt="{{ item.title }}">
                     
                     <h4 class="fw-bold">{{ item.title }}</h4>
                     <p class="text-muted">Auction Code: <strong>{{ item.code }}</strong></p>
@@ -105,5 +133,64 @@
             });
         });
     </script>
+
+    <div id="imagePreview" class="image-preview" hidden
+         role="dialog" aria-modal="true" aria-label="Image preview">
+        <img id="imagePreviewFull" src="" alt="Product image">
+        <div class="image-preview-actions">
+            <a id="imagePreviewSave" class="image-preview-save" href="#" download>Save</a>
+            <button id="imagePreviewBack" class="image-preview-back" type="button">Back</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const preview = document.getElementById("imagePreview");
+        const fullImage = document.getElementById("imagePreviewFull");
+        const saveLink = document.getElementById("imagePreviewSave");
+        const backButton = document.getElementById("imagePreviewBack");
+
+        document.querySelectorAll(".item-img").forEach(function (img) {
+            img.addEventListener("click", function () {
+                const source = img.currentSrc || img.src;
+                fullImage.src = source;
+                fullImage.alt = img.alt || "Product image";
+
+                // Cloudinary attachment flag helps the browser download the image.
+                let downloadUrl = source;
+                if (source.includes("/image/upload/")) {
+                    downloadUrl = source.replace(
+                        "/image/upload/",
+                        "/image/upload/fl_attachment/"
+                    );
+                }
+
+                saveLink.href = downloadUrl;
+                saveLink.download = "dire-pro-max-product-image";
+                preview.hidden = false;
+                document.body.style.overflow = "hidden";
+            });
+        });
+
+        function closePreview() {
+            preview.hidden = true;
+            fullImage.src = "";
+            document.body.style.overflow = "";
+        }
+
+        backButton.addEventListener("click", closePreview);
+
+        preview.addEventListener("click", function (event) {
+            if (event.target === preview) closePreview();
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !preview.hidden) {
+                closePreview();
+            }
+        });
+    });
+    </script>
+
 </body>
 </html>
