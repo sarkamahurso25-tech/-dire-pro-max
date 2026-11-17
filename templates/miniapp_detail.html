@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#092b25">
+    <title>DIRE PRO MAX - Auction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/miniapp.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/miniapp">
+            <span class="brand-mark">DP</span>
+            <span>DIRE PRO <b>MAX</b></span>
+        </a>
+        <a class="back-link" href="/miniapp">← Auctions</a>
+    </header>
+
+    <main class="detail-container">
+        <div id="detail-message" class="message">Loading auction...</div>
+
+        <section id="detail-content" class="detail-layout" hidden>
+            <div class="detail-product">
+                <img id="product-image" src="" alt="Auction product">
+                <div class="detail-product-info">
+                    <span class="eyebrow">AUCTION DETAILS</span>
+                    <h1 id="product-title"></h1>
+                    <p id="product-description"></p>
+                    <div class="detail-facts">
+                        <div><span>Product code</span><b id="product-code"></b></div>
+                        <div><span>Service fee</span><b id="service-fee"></b></div>
+                        <div><span>Minimum bid</span><b id="minimum-bid"></b></div>
+                        <div><span>Submitted bids</span><b id="bid-count"></b></div>
+                        <div><span>Time remaining</span><b id="remaining-time"></b></div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="bid-form" class="bid-form">
+                <span class="eyebrow">PARTICIPATE</span>
+                <h2>Submit your bid</h2>
+                <p class="form-intro">
+                    Enter your details and Telebirr transaction information.
+                </p>
+
+                <label for="bidder-name">Full name</label>
+                <input id="bidder-name" name="bidder_name"
+                       type="text" maxlength="150" required
+                       placeholder="Enter your full name">
+
+                <label for="bid-phone">Phone number</label>
+                <input id="bid-phone" name="phone"
+                       type="tel" maxlength="30" required
+                       placeholder="Enter your phone number">
+
+                <label for="bid-amount">Your bid amount (Br)</label>
+                <input id="bid-amount" name="bid_amount"
+                       type="number" min="0.01" step="any" required
+                       placeholder="Enter bid amount">
+
+                <label for="telebirr-account">Telebirr account</label>
+                <select id="telebirr-account" name="telebirr_account" required>
+                    <option value="">Loading accounts...</option>
+                </select>
+
+                <label for="transaction-id">Telebirr transaction ID</label>
+                <input id="transaction-id" name="transaction_id"
+                       type="text" maxlength="150" required
+                       placeholder="Enter transaction ID">
+
+                <div class="payment-note">
+                    <b>Important:</b> Your payment will remain pending until
+                    the administrator verifies the transaction. Submitting
+                    a transaction ID does not mean payment is confirmed.
+                </div>
+
+                <button id="submit-bid" class="submit-bid" type="submit">
+                    SUBMIT BID
+                </button>
+                <div id="bid-result" class="message" role="status"></div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <b>DIRE PRO MAX</b>
+        <span>Discover · Bid · Win</span>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/miniapp_detail.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#092b25">
+    <title>DIRE PRO MAX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/miniapp.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/miniapp">
+            <span class="brand-mark">DP</span>
+            <span>DIRE PRO <b>MAX</b></span>
+        </a>
+        <span class="live-label"><i></i> LIVE AUCTIONS</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="eyebrow">BID SMART. WIN BIG.</span>
+                <h1>Discover your next <span>winning deal.</span></h1>
+                <p>Explore products, place your bid and follow live auctions.</p>
+                <a href="#auction-list" class="primary-btn">Explore auctions</a>
+            </div>
+            <div class="hero-decoration">DP</div>
+        </section>
+
+        <section class="section-heading" id="auction-list">
+            <div>
+                <span class="eyebrow">LIVE MARKETPLACE</span>
+                <h2>Active auctions</h2>
+            </div>
+            <span class="count" id="auction-count">Loading...</span>
+        </section>
+
+        <div id="message" class="message">Loading auctions...</div>
+        <section class="auction-grid" id="auctions"></section>
+    </main>
+
+    <footer>
+        <b>DIRE PRO MAX</b>
+        <span>Discover · Bid · Win</span>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/miniapp.js') }}"></script>
+</body>
+</html>

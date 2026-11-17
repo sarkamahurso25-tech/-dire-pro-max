@@ -4,12 +4,13 @@ import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import IntegrityError
 from functools import wraps
 from types import SimpleNamespace
 
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash
+    url_for, flash, jsonify
 )
 from flask_login import (
     LoginManager, login_user, logout_user,
@@ -242,6 +243,7 @@ def auction_detail(item_id):
     if (
         not auction
         or auction.status != "active"
+        or auction.start_time > datetime.utcnow()
         or auction.end_time <= datetime.utcnow()
     ):
         flash("Auction kun amma hin jiru ykn yeroo isaa xumureera.", "warning")
@@ -259,13 +261,21 @@ def auction_detail(item_id):
 
             if not bidder_name or len(bidder_name) > 150:
                 raise ValueError("Maqaa guutuu kee galchi.")
-            if not user_phone or len(user_phone) > 30:
+            if (
+                not re.fullmatch(r"[+0-9() -]{7,30}", user_phone)
+                or sum(ch.isdigit() for ch in user_phone) < 7
+            ):
                 raise ValueError("Lakkoofsa bilbilaa sirrii galchi.")
             if not tx_id or len(tx_id) > 150:
                 raise ValueError("Telebirr Transaction ID sirrii galchi.")
             if selected_account not in get_telebirr_numbers():
                 raise ValueError("Lakkoofsa Telebirr sirrii filadhu.")
-            if not bid_amount.is_finite() or bid_amount <= 0:
+            if (
+                not bid_amount.is_finite()
+                or bid_amount <= 0
+                or bid_amount > Decimal("9999999999.99")
+                or bid_amount.as_tuple().exponent < -2
+            ):
                 raise ValueError("Bid amount sirrii galchi.")
             if bid_amount < item.minimum_bid:
                 raise ValueError(
@@ -313,6 +323,10 @@ def auction_detail(item_id):
         except (ValueError, ArithmeticError):
             db.session.rollback()
             flash("Maaloo odeeffannoo sirrii galchi.", "danger")
+        except IntegrityError:
+            db.session.rollback()
+            flash("Transaction ID kanaan duraan galmaa'eera.", "danger")
+            return redirect(url_for("auction_detail", item_id=item_id))
         except Exception:
             db.session.rollback()
             app.logger.exception("Bid galmeessuu irratti dogoggora")
@@ -622,3 +636,237 @@ def secure_admin_password_reset():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+
+# ============================================================
+# DIRE PRO MAX - TELEBIRR MINI-APP JSON API
+# Existing website and admin routes remain unchanged.
+# ============================================================
+
+def miniapp_auction_json(auction):
+    product = auction.product
+    item = get_auction_item(auction)
+
+    if product.image and product.image.startswith(("https://", "http://")):
+        image_url = product.image
+    elif product.image:
+        image_url = url_for(
+            "static",
+            filename="uploads/" + product.image,
+            _external=True
+        )
+    else:
+        image_url = None
+
+    return {
+        "id": auction.id,
+        "product_id": product.id,
+        "title": auction.title,
+        "product_name": product.name,
+        "code": product.code or "",
+        "description": product.description or "",
+        "image_url": image_url,
+        "service_fee": str(product.service_fee or Decimal("0.00")),
+        "starting_price": str(product.starting_price or Decimal("0.00")),
+        "minimum_bid": str(item.minimum_bid),
+        "bids_count": item.bids_count,
+        "status": auction.status,
+        "start_time": auction.start_time.isoformat(),
+        "end_time": auction.end_time.isoformat(),
+        "remaining_seconds": item.remaining_seconds,
+    }
+
+
+def miniapp_active_auctions():
+    now = datetime.utcnow()
+    return (
+        Auction.query
+        .filter(
+            Auction.status == "active",
+            Auction.start_time <= now,
+            Auction.end_time > now
+        )
+        .order_by(Auction.id.desc())
+        .all()
+    )
+
+
+@app.route("/api/miniapp/home", methods=["GET"])
+def miniapp_home_api():
+    auctions = miniapp_active_auctions()
+    return jsonify({
+        "success": True,
+        "app": "DIRE PRO MAX",
+        "message": "Welcome to DIRE PRO MAX",
+        "active_auctions_count": len(auctions),
+        "auctions": [miniapp_auction_json(a) for a in auctions[:6]]
+    })
+
+
+@app.route("/api/miniapp/auctions", methods=["GET"])
+def miniapp_auctions_api():
+    auctions = miniapp_active_auctions()
+    return jsonify({
+        "success": True,
+        "count": len(auctions),
+        "auctions": [miniapp_auction_json(a) for a in auctions]
+    })
+
+
+@app.route("/api/miniapp/auction/<int:item_id>", methods=["GET"])
+def miniapp_auction_detail_api(item_id):
+    auction = db.session.get(Auction, item_id)
+
+    if not auction:
+        return jsonify({
+            "success": False,
+            "error": "Auction not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "auction": miniapp_auction_json(auction),
+        "telebirr_accounts": get_telebirr_numbers()
+    })
+
+
+@app.route("/api/miniapp/auction/<int:item_id>/bid", methods=["POST"])
+def miniapp_place_bid_api(item_id):
+    auction = db.session.get(Auction, item_id)
+
+    if (
+        not auction
+        or auction.status != "active"
+        or auction.start_time > datetime.utcnow()
+        or auction.end_time <= datetime.utcnow()
+    ):
+        return jsonify({
+            "success": False,
+            "error": "Auction is not currently available"
+        }), 404
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({
+            "success": False,
+            "error": "JSON request body is required"
+        }), 400
+
+    try:
+        text_fields = (
+            "bidder_name", "phone", "transaction_id", "telebirr_account"
+        )
+        if any(not isinstance(data.get(key), str) for key in text_fields):
+            raise ValueError("Text fields must be strings.")
+
+        bidder_name = data["bidder_name"].strip()
+        user_phone = data["phone"].strip()
+        tx_id = data["transaction_id"].strip()
+        selected_account = data["telebirr_account"].strip()
+
+        raw_amount = data.get("bid_amount")
+        if raw_amount is None or isinstance(raw_amount, bool):
+            raise ValueError("Bid amount is required.")
+        bid_amount = Decimal(str(raw_amount))
+
+        item = get_auction_item(auction)
+
+        if not bidder_name or len(bidder_name) > 150:
+            raise ValueError("Enter a valid full name.")
+
+        if (
+            not re.fullmatch(r"[+0-9() -]{7,30}", user_phone)
+            or sum(ch.isdigit() for ch in user_phone) < 7
+        ):
+            raise ValueError("Enter a valid phone number.")
+
+        if not tx_id or len(tx_id) > 150:
+            raise ValueError("Enter a valid Telebirr transaction ID.")
+
+        if selected_account not in get_telebirr_numbers():
+            raise ValueError("Select a valid Telebirr account.")
+
+        if (
+            not bid_amount.is_finite()
+            or bid_amount <= 0
+            or bid_amount > Decimal("9999999999.99")
+            or bid_amount.as_tuple().exponent < -2
+        ):
+            raise ValueError("Enter a valid bid amount.")
+
+        if bid_amount < item.minimum_bid:
+            raise ValueError(
+                f"Minimum bid is {item.minimum_bid} Br."
+            )
+
+        existing_payment = Payment.query.filter_by(
+            transaction_ref=tx_id
+        ).first()
+
+        if existing_payment:
+            return jsonify({
+                "success": False,
+                "error": "This transaction ID has already been submitted."
+            }), 409
+
+        bid = Bid(
+            auction_id=auction.id,
+            user_id=None,
+            amount=bid_amount,
+            phone=user_phone,
+            bidder_name=bidder_name,
+            tx_id=tx_id
+        )
+
+        payment = Payment(
+            user_id=None,
+            auction_id=auction.id,
+            amount=item.fee,
+            provider="telebirr",
+            telebirr_account=selected_account,
+            transaction_ref=tx_id,
+            status="pending"
+        )
+
+        db.session.add(bid)
+        db.session.add(payment)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Bid submitted. Payment is pending admin verification.",
+            "bid_status": "submitted",
+            "payment_status": "pending"
+        }), 201
+
+    except (ValueError, ArithmeticError):
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "error": "Please check the submitted information."
+        }), 400
+
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "error": "This transaction ID has already been submitted."
+        }), 409
+
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Mini-App bid submission failed")
+        return jsonify({
+            "success": False,
+            "error": "Bid submission failed. Please try again."
+        }), 500
+
+
+@app.route("/miniapp", methods=["GET"])
+def miniapp_page():
+    return render_template("miniapp.html")
+
+
+@app.route("/miniapp/auction/<int:item_id>", methods=["GET"])
+def miniapp_auction_page(item_id):
+    return render_template("miniapp_detail.html")
