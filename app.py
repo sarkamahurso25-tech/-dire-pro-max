@@ -52,6 +52,35 @@ with app.app_context():
                 text("ALTER TABLE bid ADD COLUMN bidder_name VARCHAR(150)")
             )
 
+    # Prevent duplicate non-empty Telebirr transaction references.
+    with db.engine.begin() as connection:
+        duplicate = connection.execute(text("""
+            SELECT transaction_ref, COUNT(*) AS total
+            FROM payment
+            WHERE transaction_ref IS NOT NULL
+              AND transaction_ref <> ''
+            GROUP BY transaction_ref
+            HAVING COUNT(*) > 1
+            LIMIT 1
+        """)).first()
+
+        if duplicate:
+            app.logger.warning(
+                "Duplicate transaction references exist; "
+                "unique index was not created. No records were deleted."
+            )
+        else:
+            connection.execute(text("""
+                CREATE UNIQUE INDEX IF NOT EXISTS
+                uq_payment_transaction_ref_nonempty
+                ON payment (transaction_ref)
+                WHERE transaction_ref IS NOT NULL
+                  AND transaction_ref <> ''
+            """))
+            app.logger.info(
+                "Unique transaction reference index is ready."
+            )
+
     app.logger.info("Database tables and bidder-name column initialized.")
 
 login_manager = LoginManager()
