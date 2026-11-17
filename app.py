@@ -838,6 +838,20 @@ def miniapp_place_bid_api(item_id):
                 "error": "This transaction ID has already been submitted."
             }), 409
 
+        # Refresh auction state immediately before recording the bid.
+        db.session.refresh(auction)
+        now = datetime.utcnow()
+
+        if (
+            auction.status != "active"
+            or auction.start_time > now
+            or auction.end_time <= now
+        ):
+            return jsonify({
+                "success": False,
+                "error": "This auction has ended or is not open for bidding."
+            }), 409
+
         bid = Bid(
             auction_id=auction.id,
             user_id=None,

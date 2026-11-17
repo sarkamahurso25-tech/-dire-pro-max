@@ -7,6 +7,8 @@ const detailContent = document.getElementById("detail-content");
 const bidForm = document.getElementById("bid-form");
 const bidResult = document.getElementById("bid-result");
 const submitButton = document.getElementById("submit-bid");
+let remainingSeconds = 0;
+let auctionAcceptingBids = false;
 
 function safeText(value) {
     return String(value ?? "");
@@ -51,8 +53,9 @@ async function loadAuction() {
             `${item.minimum_bid} Br`;
         document.getElementById("bid-count").textContent =
             String(item.bids_count ?? 0);
+        remainingSeconds = Math.max(0, Number(item.remaining_seconds) || 0);
         document.getElementById("remaining-time").textContent =
-            formatRemaining(item.remaining_seconds);
+            formatRemaining(remainingSeconds);
 
         const image = document.getElementById("product-image");
         if (item.image_url) {
@@ -75,11 +78,15 @@ async function loadAuction() {
         amountInput.min = item.minimum_bid;
         amountInput.placeholder = `Minimum ${item.minimum_bid} Br`;
 
-        if (item.status !== "active" || Number(item.remaining_seconds) <= 0) {
+        auctionAcceptingBids =
+            item.status === "active" && remainingSeconds > 0;
+
+        if (!auctionAcceptingBids) {
             showMessage(detailMessage, "This auction is not currently accepting bids.", true);
             bidForm.hidden = true;
         } else {
             detailMessage.textContent = "";
+            bidForm.hidden = false;
         }
 
         detailContent.hidden = false;
@@ -91,6 +98,12 @@ async function loadAuction() {
 bidForm.addEventListener("submit", async event => {
     event.preventDefault();
     bidResult.textContent = "";
+
+    if (!auctionAcceptingBids || remainingSeconds <= 0) {
+        bidForm.hidden = true;
+        showMessage(detailMessage, "This auction has ended. Bidding is closed.", true);
+        return;
+    }
 
     if (!bidForm.reportValidity()) return;
 
@@ -129,9 +142,24 @@ bidForm.addEventListener("submit", async event => {
     } catch (error) {
         showMessage(bidResult, error.message, true);
     } finally {
-        submitButton.disabled = false;
+        submitButton.disabled = !auctionAcceptingBids;
         submitButton.textContent = "SUBMIT BID";
     }
 });
+
+setInterval(() => {
+    if (remainingSeconds > 0) {
+        remainingSeconds -= 1;
+        document.getElementById("remaining-time").textContent =
+            formatRemaining(remainingSeconds);
+    }
+
+    if (remainingSeconds <= 0 && auctionAcceptingBids) {
+        auctionAcceptingBids = false;
+        bidForm.hidden = true;
+        submitButton.disabled = true;
+        showMessage(detailMessage, "This auction has ended. Bidding is closed.", true);
+    }
+}, 1000);
 
 loadAuction();

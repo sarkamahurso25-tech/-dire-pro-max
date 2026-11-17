@@ -76,3 +76,6 @@ setInterval(() => {
 }, 1000);
 
 loadAuctions();
+
+// Refresh auction list periodically to remove expired auctions.
+setInterval(loadAuctions, 30000);
