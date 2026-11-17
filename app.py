@@ -16,6 +16,8 @@ from flask_login import (
     login_required, current_user
 )
 import secrets
+import cloudinary
+from cloudinary.uploader import upload as cloudinary_upload
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -381,12 +383,26 @@ def admin_dashboard():
                 if not allowed_file(uploaded.filename):
                     raise ValueError("Suuraa JPG, PNG ykn WEBP qofa fayyadami.")
 
-                safe_name = secure_filename(uploaded.filename)
-                extension = safe_name.rsplit(".", 1)[1].lower()
-                image_filename = f"{uuid.uuid4().hex}.{extension}"
-                uploaded.save(
-                    os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
+                cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+                api_key = os.getenv("CLOUDINARY_API_KEY")
+                api_secret = os.getenv("CLOUDINARY_API_SECRET")
+
+                if not all((cloud_name, api_key, api_secret)):
+                    raise ValueError("Cloudinary configuration is missing on server.")
+
+                cloudinary.config(
+                    cloud_name=cloud_name,
+                    api_key=api_key,
+                    api_secret=api_secret,
+                    secure=True,
                 )
+
+                result = cloudinary_upload(
+                    uploaded,
+                    folder="dire-pro-max/products",
+                    resource_type="image",
+                )
+                image_filename = result["secure_url"]
 
             now = datetime.utcnow()
             end_time = now + timedelta(
