@@ -216,7 +216,8 @@ def get_confirmed_winner(auction_id):
         .filter(
             Payment.auction_id == auction_id,
             Payment.status == "confirmed",
-            Payment.transaction_ref.isnot(None)
+            Payment.transaction_ref.isnot(None),
+            Payment.transaction_ref != ""
         ).all()
     }
 
@@ -595,13 +596,37 @@ def admin_dashboard():
 @admin_required
 def confirm_payment(payment_id):
     payment = db.session.get(Payment, payment_id)
+
     if not payment:
         flash("Kaffaltiin hin argamne.", "danger")
         return redirect(url_for("admin_dashboard"))
 
-    payment.status = "confirmed"
-    db.session.commit()
-    flash("Kaffaltiin mirkanaa'eera.", "success")
+    if payment.status == "confirmed":
+        flash("Kaffaltiin kun duraan mirkanaa'eera.", "info")
+        return redirect(url_for("admin_dashboard"))
+
+    if not payment.transaction_ref:
+        flash("Transaction ID hin qabu; kaffaltii kana hin mirkaneessine.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    matching_bid = Bid.query.filter_by(
+        auction_id=payment.auction_id,
+        tx_id=payment.transaction_ref
+    ).first()
+
+    if not matching_bid:
+        flash("Payment kanaaf bid wal-simu hin argamne.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    try:
+        payment.status = "confirmed"
+        db.session.commit()
+        flash("Kaffaltiin mirkanaa'eera.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Payment confirmation failed")
+        flash("Kaffaltii mirkaneessuun hin milkoofne.", "danger")
+
     return redirect(url_for("admin_dashboard"))
 
 
