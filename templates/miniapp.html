@@ -20,16 +20,19 @@
     </header>
 
     <main class="container">
-        <section class="hero">
-            <div class="hero-copy">
-                <span class="eyebrow">BID SMART. WIN BIG.</span>
-                <h1>Discover your next <span>winning deal.</span></h1>
-                <p>Explore products, place your bid and follow live auctions.</p>
-                <a href="#auction-list" class="primary-btn">Explore auctions</a>
+        <section class="welcome-screen" id="welcome-screen">
+            <div class="welcome-content">
+                <div class="welcome-mark">DP</div>
+                <span class="welcome-eyebrow">WELCOME TO</span>
+                <h1>DIRE PRO <span>MAX</span></h1>
+                <p>Discover · Bid · Win</p>
+                <button type="button" class="start-bidding-btn" id="start-bidding">
+                    START BIDDING
+                </button>
             </div>
-            <div class="hero-decoration">DP</div>
         </section>
 
+        <section id="marketplace" hidden>
         <section class="section-heading" id="auction-list">
             <div>
                 <span class="eyebrow">LIVE MARKETPLACE</span>
@@ -40,6 +43,7 @@
 
         <div id="message" class="message">Loading auctions...</div>
         <section class="auction-grid" id="auctions"></section>
+        </section>
     </main>
 
     <footer>

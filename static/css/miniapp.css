@@ -472,3 +472,83 @@ footer b { color: #087f5b; }
         font-size: 10px;
     }
 }
+
+/* DIRE PRO MAX WELCOME SCREEN */
+.welcome-screen {
+    min-height: calc(100vh - 110px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 35px 20px;
+    background:
+        radial-gradient(ellipse at top, #14513e 0%, transparent 65%),
+        linear-gradient(145deg, #071b18, #102923);
+}
+
+.welcome-content {
+    width: 100%;
+    max-width: 650px;
+}
+
+.welcome-mark {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 25px;
+    background: #19c58b;
+    color: #05251b;
+    font-size: 32px;
+    font-weight: 1000;
+    box-shadow: 0 12px 45px #19c58b35;
+}
+
+.welcome-eyebrow {
+    color: #19c58b;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 5px;
+}
+
+.welcome-content h1 {
+    margin: 18px 0;
+    font-size: clamp(36px, 8vw, 65px);
+    font-weight: 1000;
+    letter-spacing: 2px;
+}
+
+.welcome-content h1 span {
+    color: #19c58b;
+}
+
+.welcome-content p {
+    color: #a8bcb4;
+    font-size: 17px;
+    letter-spacing: 3px;
+}
+
+.start-bidding-btn {
+    margin-top: 30px;
+    padding: 17px 38px;
+    border: none;
+    border-radius: 12px;
+    background: #19c58b;
+    color: #05251b;
+    font-size: 16px;
+    font-weight: 1000;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    box-shadow: 0 8px 30px #19c58b35;
+}
+
+.start-bidding-btn:hover {
+    background: #35e5aa;
+    transform: translateY(-2px);
+}
+
+#marketplace[hidden],
+#welcome-screen[hidden] {
+    display: none !important;
+}

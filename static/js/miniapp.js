@@ -79,3 +79,16 @@ loadAuctions();
 
 // Refresh auction list periodically to remove expired auctions.
 setInterval(loadAuctions, 30000);
+
+// DIRE PRO MAX Welcome Screen
+document.getElementById("start-bidding").addEventListener("click", () => {
+    document.getElementById("welcome-screen").hidden = true;
+
+    const marketplace = document.getElementById("marketplace");
+    marketplace.hidden = false;
+
+    marketplace.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+});
