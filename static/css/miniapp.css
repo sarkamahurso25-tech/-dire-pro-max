@@ -271,3 +271,204 @@ footer b { color: var(--green); }
     .detail-layout { grid-template-columns: 1fr; }
     .detail-product img { height: 260px; }
 }
+
+/* ===== DIRE PRO MAX GLASS WHITE + GREEN THEME ===== */
+:root {
+    color-scheme: light;
+    --bg: #f4f8f5;
+    --panel: #ffffff;
+    --green: #087f5b;
+    --text: #173b2e;
+    --muted: #687d72;
+}
+
+body {
+    background: #f4f8f5;
+    color: var(--text);
+}
+
+.topbar {
+    background: rgba(255,255,255,.94);
+    border-bottom: 1px solid #dcebe0;
+    box-shadow: 0 3px 15px #174b3010;
+    backdrop-filter: blur(14px);
+}
+
+.brand { color: #123d2e; }
+
+.brand-mark {
+    color: white;
+    background: #087f5b;
+    box-shadow: 0 4px 12px #087f5b30;
+}
+
+.live-label { color: #527263; }
+
+.live-label i { background: #16a36e; }
+
+.hero {
+    background: linear-gradient(120deg, #ffffff, #e7f5eb 65%, #d6efdf);
+    border: 1px solid #cde5d4;
+    box-shadow: 0 12px 35px #164b3010;
+}
+
+.hero-decoration { color: #087f5b12; }
+
+.eyebrow { color: #087f5b; }
+
+.hero p, .count, .message { color: #687d72; }
+
+h1, h2, h3 { color: #173b2e; }
+
+h1 span { color: #087f5b; }
+
+.primary-btn, .bid-btn, .submit-bid {
+    background: #087f5b;
+    color: #ffffff;
+    border: 0;
+    box-shadow: 0 5px 13px #087f5b25;
+    transition: .2s ease;
+}
+
+.primary-btn:hover, .bid-btn:hover, .submit-bid:hover {
+    background: #066b4c;
+    transform: translateY(-2px);
+}
+
+.auction-card {
+    background: #ffffff;
+    border: 1px solid #dcebe0;
+    box-shadow: 0 7px 22px #164b3010;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.auction-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px #164b3018;
+}
+
+.auction-card img {
+    background: #edf6ef;
+}
+
+.card-body h3 { color: #173b2e; }
+
+.code { color: #71867a; }
+
+.fee { color: #087f5b; }
+
+.timer { color: #b07816; }
+
+.message.error { color: #c03939; }
+
+footer {
+    background: #ffffff;
+    border-top: 1px solid #dcebe0;
+    color: #687d72;
+}
+
+footer b { color: #087f5b; }
+
+.back-link { color: #087f5b; }
+
+.detail-product, .bid-form {
+    background: #ffffff;
+    border: 1px solid #dcebe0;
+    box-shadow: 0 8px 25px #164b3010;
+}
+
+.detail-product img { background: #f0f7f1; }
+
+.detail-product-info p { color: #687d72; }
+
+.detail-facts div {
+    background: #eef7f0;
+    border: 1px solid #dcebe0;
+}
+
+.detail-facts span { color: #687d72; }
+
+.detail-facts b { color: #173b2e; }
+
+.form-intro { color: #687d72; }
+
+.bid-form input, .bid-form select {
+    color: #173b2e;
+    background: #f8fbf8;
+    border: 1px solid #cfe1d4;
+}
+
+.bid-form input::placeholder { color: #91a399; }
+
+.bid-form input:focus, .bid-form select:focus {
+    border-color: #087f5b;
+    box-shadow: 0 0 0 3px #087f5b18;
+}
+
+.bid-form select option {
+    color: #173b2e;
+    background: #ffffff;
+}
+
+.payment-note {
+    color: #74551b;
+    background: #fff9e9;
+    border-color: #ead7a5;
+}
+
+.submit-bid:disabled { opacity: .55; }
+
+@media (max-width: 600px) {
+    .topbar { height: 62px; }
+    .hero { border-radius: 18px; }
+    .auction-card { border-radius: 13px; }
+}
+
+/* ADMIN LOGIN BUTTON */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #087f5b;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .4px;
+    border: 1px solid #087f5b;
+    transition: .2s ease;
+}
+
+.admin-login-btn:hover {
+    background: #f1f5f3;
+    color: #066747;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+    .topbar {
+        padding-left: 4%;
+        padding-right: 4%;
+    }
+
+    .header-actions {
+        gap: 8px;
+    }
+
+    .live-label {
+        font-size: 9px;
+    }
+
+    .admin-login-btn {
+        padding: 9px 10px;
+        font-size: 10px;
+    }
+}

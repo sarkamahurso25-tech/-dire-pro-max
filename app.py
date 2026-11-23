@@ -368,7 +368,7 @@ def auction_detail(item_id):
     )
 
 
-@app.route("/admin/login", methods=["GET", "POST"])
+@app.route("/dpm-control-2026", methods=["GET", "POST"])
 def admin_login():
     if current_user.is_authenticated and current_user.role == "admin":
         return redirect(url_for("admin_dashboard"))
@@ -408,7 +408,7 @@ def admin_dashboard():
         try:
             title = request.form.get("title", "").strip()
             code = request.form.get("code", "").strip()
-            fee = Decimal(request.form.get("fee", ""))
+            fee = Decimal("70.00")  # Fixed Bid Service Fee
             minimum_bid = Decimal(request.form.get("minimum_bid", ""))
             timer_text = request.form.get("timer", "").strip()
 
