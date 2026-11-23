@@ -201,7 +201,7 @@ def get_auction_item(auction):
         title=auction.title,
         code=product.code or "",
         fee=product.service_fee or Decimal("0.00"),
-        minimum_bid=max(Decimal("100.00"), Decimal(str(auction.minimum_bid or "100.00"))),
+        minimum_bid=max(Decimal("10.00"), Decimal(str(auction.minimum_bid or "10.00"))),
         timer=auction.timer_text or "",
         bids_count=bids_count,
         image=product.image or "default.png",
@@ -417,8 +417,8 @@ def admin_dashboard():
                 raise ValueError("Odeeffannoo dirqamaa guuti.")
             if not fee.is_finite() or fee < 0:
                 raise ValueError("Service Fee sirrii galchi.")
-            if not minimum_bid.is_finite() or minimum_bid < Decimal("100.00"):
-                raise ValueError("Minimum Bid xiqqaateen 100 Birr ta'uu qaba.")
+            if not minimum_bid.is_finite() or minimum_bid < Decimal("10.00"):
+                raise ValueError("Minimum Bid xiqqaateen 10 Birr ta'uu qaba.")
 
             image_filename = "default.png"
             uploaded = request.files.get("image")

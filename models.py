@@ -40,7 +40,7 @@ class Auction(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(20), default="upcoming")
     timer_text = db.Column(db.String(100))
-    minimum_bid = db.Column(db.Numeric(12, 2), nullable=False, default=100.00)
+    minimum_bid = db.Column(db.Numeric(12, 2), nullable=False, default=10.00)
 
     product = db.relationship("Product", backref="auctions")
 
