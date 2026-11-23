@@ -78,6 +78,16 @@ async function loadAuction() {
         amountInput.min = item.minimum_bid;
         amountInput.placeholder = `Minimum ${item.minimum_bid} Br`;
 
+        const requestedAmount = Number(
+            new URLSearchParams(window.location.search).get("amount")
+        );
+        const minimumAmount = Number(item.minimum_bid);
+
+        amountInput.value =
+            Number.isFinite(requestedAmount) && requestedAmount >= minimumAmount
+                ? requestedAmount.toFixed(2)
+                : minimumAmount.toFixed(2);
+
         auctionAcceptingBids =
             item.status === "active" && remainingSeconds > 0;
 

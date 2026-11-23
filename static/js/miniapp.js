@@ -36,7 +36,23 @@ function renderAuctions(items) {
                     ${formatTime(item.remaining_seconds)}</span>
                 </div>
                 <div class="code">${Number(item.bids_count)} bids submitted</div>
-                <a class="bid-btn" href="/miniapp/auction/${Number(item.id)}">VIEW AUCTION</a>
+
+                <div class="bid-stepper" data-minimum="${Number(item.minimum_bid) || 10}">
+                    <label>YOUR BID AMOUNT</label>
+                    <div class="bid-stepper-controls">
+                        <button type="button" class="bid-step-btn"
+                                data-step="-1" aria-label="Decrease bid">−</button>
+                        <span class="bid-step-value">${Number(item.minimum_bid) || 10} Br</span>
+                        <button type="button" class="bid-step-btn"
+                                data-step="1" aria-label="Increase bid">+</button>
+                    </div>
+                </div>
+
+                <a class="bid-btn"
+                   data-auction-id="${Number(item.id)}"
+                   href="/miniapp/auction/${Number(item.id)}?amount=${Number(item.minimum_bid) || 10}">
+                   VIEW AUCTION
+                </a>
             </div>
         </article>`;
     }).join("");
@@ -47,6 +63,38 @@ function renderAuctions(items) {
         messageBox.textContent = "";
     }
 }
+
+// Independent bid amount controls on each auction card.
+auctionGrid.addEventListener("click", event => {
+    const stepButton = event.target.closest(".bid-step-btn");
+    if (!stepButton) return;
+
+    const stepper = stepButton.closest(".bid-stepper");
+    if (!stepper) return;
+
+    const minimum = Math.max(0.01, Number(stepper.dataset.minimum) || 10);
+    const valueBox = stepper.querySelector(".bid-step-value");
+    const current = Number.parseFloat(valueBox.textContent) || minimum;
+    const next = Math.max(minimum, current + (Number(stepButton.dataset.step) * 10));
+
+    valueBox.textContent = `${next.toFixed(2).replace(/\\.00$/, "")} Br`;
+});
+
+auctionGrid.addEventListener("click", event => {
+    const link = event.target.closest(".bid-btn");
+    if (!link) return;
+
+    const card = link.closest(".auction-card");
+    const valueBox = card?.querySelector(".bid-step-value");
+    const amount = Number.parseFloat(valueBox?.textContent) || 10;
+    const auctionId = Number(link.dataset.auctionId);
+
+    if (!Number.isInteger(auctionId) || auctionId < 1) return;
+
+    event.preventDefault();
+    window.location.href =
+        `/miniapp/auction/${auctionId}?amount=${encodeURIComponent(amount)}`;
+});
 
 async function loadAuctions() {
     try {

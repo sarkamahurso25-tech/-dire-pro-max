@@ -481,9 +481,12 @@ footer b { color: #087f5b; }
     justify-content: center;
     text-align: center;
     padding: 35px 20px;
-    background:
-        radial-gradient(ellipse at top, #14513e 0%, transparent 65%),
-        linear-gradient(145deg, #071b18, #102923);
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 28px;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    box-shadow: 0 12px 45px rgba(255, 255, 255, 0.08);
 }
 
 .welcome-content {
@@ -551,4 +554,161 @@ footer b { color: #087f5b; }
 #marketplace[hidden],
 #welcome-screen[hidden] {
     display: none !important;
+}
+\n
+/* YOUR BID AMOUNT controls on Mini-App auction cards */
+.bid-stepper {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #dcebe0;
+    border-radius: 12px;
+    background: #f4f8f5;
+}
+
+.bid-stepper label {
+    display: block;
+    margin-bottom: 9px;
+    color: #173b2e;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .7px;
+}
+
+.bid-stepper-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bid-step-btn {
+    width: 40px;
+    height: 38px;
+    flex: 0 0 40px;
+    border: 0;
+    border-radius: 9px;
+    background: #087f5b;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.bid-step-btn:active {
+    transform: scale(.95);
+}
+
+.bid-step-value {
+    color: #173b2e;
+    font-size: 16px;
+    font-weight: 900;
+    text-align: center;
+}
+
+/* DIRE PRO MAX - WEBSITE MATCHING MINI-APP COVER */
+.topbar {
+    background: #0f763e;
+    border-bottom: none;
+}
+
+.topbar .brand {
+    color: #ffffff;
+}
+
+.topbar .brand b {
+    color: #ffffff;
+}
+
+.topbar .brand-mark {
+    background: #ffffff;
+    color: #0f763e;
+}
+
+.topbar .live-label {
+    color: #ffffff;
+}
+
+.topbar .live-label i {
+    background: #b8ef83;
+}
+
+.welcome-screen {
+    min-height: calc(100vh - 110px);
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding: 50px 25px;
+    background: #79bb3f;
+    border: none;
+    border-radius: 15px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.16);
+}
+
+.welcome-mark {
+    display: none;
+}
+
+.welcome-eyebrow {
+    color: #ffffff;
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+.welcome-content h1 {
+    color: #ffffff;
+    font-size: clamp(28px, 6vw, 48px);
+    letter-spacing: 0;
+    line-height: 1.2;
+}
+
+.welcome-content h1 span {
+    color: #ffffff;
+}
+
+.welcome-content h2 {
+    margin: 18px 0;
+    color: #ffffff;
+    font-size: clamp(32px, 7vw, 55px);
+    font-weight: 1000;
+}
+
+.welcome-content p {
+    max-width: 850px;
+    margin: 20px auto;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1.8;
+    letter-spacing: 0;
+}
+
+.start-bidding-btn {
+    padding: 15px 35px;
+    border-radius: 30px;
+    background: linear-gradient(to right, #1769D2, #4A90E2);
+    color: #ffffff;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.start-bidding-btn:hover {
+    background: linear-gradient(to right, #1259b8, #357ed1);
+    color: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .welcome-screen {
+        min-height: calc(100vh - 125px);
+        padding: 35px 18px;
+    }
+
+    .welcome-content p {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .start-bidding-btn {
+        padding: 14px 25px;
+        font-size: 15px;
+    }
 }
