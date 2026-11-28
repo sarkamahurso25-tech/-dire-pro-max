@@ -630,17 +630,109 @@ def confirm_payment(payment_id):
     return redirect(url_for("admin_dashboard"))
 
 
+@app.route("/admin/edit/<int:item_id>", methods=["POST"])
+@admin_required
+def edit_auction(item_id):
+    auction = db.session.get(Auction, item_id)
+    if not auction:
+        flash("Auction hin argamne.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    try:
+        title = request.form.get("title", "").strip()
+        code_val = request.form.get("code", "").strip()
+        status_val = request.form.get("status", auction.status).strip()
+        timer_text = request.form.get("timer", "").strip()
+        min_bid_raw = request.form.get("minimum_bid", "").strip()
+        fee_raw = request.form.get("service_fee", "").strip()
+
+        if not title:
+            raise ValueError("Mata-dureen auction barbaachisaadha.")
+
+        auction.title = title
+        if status_val in ("upcoming", "active", "closed", "cancelled"):
+            auction.status = status_val
+
+        if min_bid_raw:
+            minimum_bid = Decimal(min_bid_raw)
+            if not minimum_bid.is_finite() or minimum_bid < Decimal("10.00"):
+                raise ValueError("Minimum Bid xiqqaateen 10 Birr ta'uu qaba.")
+            auction.minimum_bid = minimum_bid
+
+        if timer_text:
+            auction.timer_text = timer_text
+            auction.end_time = datetime.utcnow() + timedelta(seconds=parse_timer_seconds(timer_text))
+
+        if auction.product:
+            auction.product.name = title
+            if code_val:
+                auction.product.code = code_val
+            if fee_raw:
+                fee_val = Decimal(fee_raw)
+                if not fee_val.is_finite() or fee_val < 0:
+                    raise ValueError("Service Fee sirrii galchi.")
+                auction.product.service_fee = fee_val
+
+            uploaded = request.files.get("image")
+            if uploaded and uploaded.filename:
+                if not allowed_file(uploaded.filename):
+                    raise ValueError("Suuraa JPG, PNG ykn WEBP qofa fayyadami.")
+                cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+                api_key = os.getenv("CLOUDINARY_API_KEY")
+                api_secret = os.getenv("CLOUDINARY_API_SECRET")
+                if not all((cloud_name, api_key, api_secret)):
+                    raise ValueError("Cloudinary configuration is missing on server.")
+                cloudinary.config(
+                    cloud_name=cloud_name,
+                    api_key=api_key,
+                    api_secret=api_secret,
+                    secure=True,
+                )
+                result = cloudinary_upload(
+                    uploaded,
+                    folder="dire-pro-max/products",
+                    resource_type="image",
+                )
+                auction.product.image = result["secure_url"]
+
+        db.session.commit()
+        flash("Auction milkaa'inaan haaromfameera!", "success")
+    except (ValueError, ArithmeticError) as error:
+        db.session.rollback()
+        flash(str(error), "danger")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Auction edit failed")
+        flash("Auction edit gochuun hin danda'amne.", "danger")
+
+    return redirect(url_for("admin_dashboard"))
+
+
 @app.route("/admin/delete/<int:item_id>", methods=["POST"])
 @admin_required
 def delete_auction(item_id):
     auction = db.session.get(Auction, item_id)
-    if auction:
-        # Galmee bid/payment seenaa ta'e hin haqnu.
-        auction.status = "cancelled"
-        db.session.commit()
-        flash("Auction hojii irraa dhaabbateera.", "warning")
-    else:
+    if not auction:
         flash("Auction hin argamne.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    try:
+        prod = auction.product
+        Bid.query.filter_by(auction_id=auction.id).delete()
+        Payment.query.filter_by(auction_id=auction.id).delete()
+        Winner.query.filter_by(auction_id=auction.id).delete()
+        db.session.delete(auction)
+        db.session.flush()
+
+        if prod and Auction.query.filter_by(product_id=prod.id).count() == 0:
+            db.session.delete(prod)
+
+        db.session.commit()
+        flash("Auction guutummaatti haqameera!", "warning")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Auction delete failed")
+        flash("Auction haquun hin danda'amne.", "danger")
 
     return redirect(url_for("admin_dashboard"))
 
